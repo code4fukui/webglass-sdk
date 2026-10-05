@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title data-i18n="title">SABERA Web Bluetooth</title>
+  <style>
+    :root { color-scheme: light dark; font-family: system-ui, sans-serif; }
+    body { max-width: 42rem; margin: 2rem auto; padding: 0 1rem; }
+    button, input { font: inherit; padding: .55rem .7rem; margin: .2rem 0; }
+    button { cursor: pointer; }
+    fieldset { margin: 1rem 0; }
+    #status { font-weight: 600; }
+    pre { min-height: 8rem; padding: .8rem; overflow: auto; background: #222; color: #b9f6ca; }
+  </style>
+</head>
+<body>
+  <h1 data-i18n="title">SABERA Web Bluetooth</h1>
+  <p id="status" data-i18n="statusDisconnected">Disconnected</p>
+  <button id="connect" data-i18n="connect">Connect</button>
+  <button id="disconnect" data-i18n="disconnect" disabled>Disconnect</button>
+  <button id="language" type="button">日本語</button>
+  <fieldset>
+    <legend data-i18n="screen">Screen</legend>
+    <button id="text-screen" data-i18n="genericTextScreen" disabled>Generic text screen</button>
+    <button id="home" data-i18n="homeScreen" disabled>Home screen</button>
+  </fieldset>
+  <fieldset>
+    <legend data-i18n="text">Text</legend>
+    <label for="message" data-i18n="textInput">Text input</label><br>
+    <input id="message" value="Hello from the browser!" aria-label="Text input">
+    <br>
+    <button id="send" data-i18n="showText" disabled>Show text</button>
+    <button id="clear" data-i18n="clearText" disabled>Clear text</button>
+  </fieldset>
+  <fieldset>
+    <legend data-i18n="other">Other</legend>
+    <button id="notify" data-i18n="sendNotification" disabled>Send sample notification</button>
+    <button id="time" data-i18n="syncTime" disabled>Sync time</button>
+  </fieldset>
+  <pre id="log" aria-live="polite"></pre>
+  <footer><a href="https://github.com/code4fukui/webglass-sdk" target="_blank" rel="noopener noreferrer">github.com/code4fukui/webglass-sdk</a></footer>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
