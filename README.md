@@ -1,29 +1,83 @@
-# SABERA Web Bluetooth sample
+# SABERA Web Bluetooth SDK
 
-`SaberaClient` は、SABERAの公開Bluetoothコマンド仕様をブラウザのWeb Bluetooth APIから利用する依存なしのESモジュールです。
+ブラウザのWeb Bluetooth APIからSABERAグラスへ接続し、テキストや通知を送信するESモジュールです。
 
-## 実行
+## URLインポートで使う
 
-Web Bluetoothは`localhost`またはHTTPSのsecure contextが必要です。
+GitHub Pagesで公開したモジュールを、次のようにURLインポートして利用できます。
+
+```html
+<!doctype html>
+<button id="connect">Connect SABERA</button>
+<button id="show">Show text</button>
+
+<script type="module">
+  import { SaberaClient } from
+    'https://code4fukui.github.io/webglass-sdk/sabera.js';
+
+  const sabera = new SaberaClient();
+
+  document.querySelector('#connect').onclick = async () => {
+    await sabera.connect();
+  };
+
+  document.querySelector('#show').onclick = async () => {
+    await sabera.showScreen(0x47); // Generic text screen
+    await sabera.sendText('Hello SABERA');
+  };
+</script>
+```
+
+`connect()`は、ユーザーのクリックなどから呼び出してください。ブラウザのBluetoothデバイス選択画面が表示されます。
+
+## 主なAPI
+
+```js
+await sabera.connect();
+await sabera.showScreen(0x47); // Generic text screen
+await sabera.sendText('Hello SABERA');
+await sabera.clearText();
+await sabera.showScreen(0x32); // Home screen
+await sabera.syncTime();
+await sabera.sendMessage({
+  appName: 'My app',
+  subject: 'Message',
+  body: 'A message from the browser',
+});
+await sabera.disconnect();
+```
+
+`sendText()`はテキスト表示コマンドだけを送信します。汎用テキスト画面を使う場合は、先に`showScreen(0x47)`を呼び出してください。
+
+受信通知は`data`イベントで受け取れます。
+
+```js
+sabera.addEventListener('data', (event) => {
+  console.log(event.detail); // DataView
+});
+```
+
+## 実行条件
+
+- Web Bluetooth対応ブラウザ（Chromium系など）
+- HTTPSのページ、または`localhost`
+- Bluetoothが有効で、SABERAが近くで起動していること
+- 接続操作をユーザーのクリックなどから実行すること
+
+GitHub Pages上のサンプル：
+
+<https://code4fukui.github.io/webglass-sdk/>
+
+## ローカルで確認する
 
 ```sh
 python3 -m http.server 8000
 ```
 
-ブラウザで <http://localhost:8000/> を開き、「接続」を押してください。対応ブラウザはChromium系（デスクトップChrome/Edge、Android Chromeなど）です。macOSではBluetoothをオンにし、SABERAを近くで起動してください。
+ブラウザで<http://localhost:8000/>を開きます。
 
-## API例
+## 仕様
 
-```js
-import { SaberaClient } from './sabera.js';
+パケット形式とUUIDは、SABERA SDKの公開Bluetoothコマンド仕様に基づいています。
 
-const sabera = new SaberaClient();
-await sabera.connect(); // ユーザー操作から呼び出す
-await sabera.syncTime();
-await sabera.sendText('Hello SABERA');
-await sabera.sendMessage({ appName: 'My app', subject: '件名', body: '本文' });
-```
-
-汎用テキスト画面を開く場合は`showScreen(0x47)`を呼び出し、その後に`sendText()`を呼び出します。`sendText()`はテキスト表示コマンドだけを送信します。
-
-`data`イベントでコマンド受信Characteristicの通知を受け取れます。`sendCommand()`に仕様準拠のバイト列を渡すこともできます。なお、Bluetoothコマンドの直接送信は、対象機器やファームウェアの仕様を確認したうえで利用してください。
+<https://github.com/taisukef/sabera-sdk/blob/main/docs/bluetooth-commands.md>
