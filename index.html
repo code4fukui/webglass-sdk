@@ -19,7 +19,6 @@
   <p id="status" data-i18n="statusDisconnected">Disconnected</p>
   <button id="connect" data-i18n="connect">Connect</button>
   <button id="disconnect" data-i18n="disconnect" disabled>Disconnect</button>
-  <button id="language" type="button">日本語</button>
   <fieldset>
     <legend data-i18n="screen">Screen</legend>
     <button id="text-screen" data-i18n="genericTextScreen" disabled>Generic text screen</button>
@@ -34,12 +33,14 @@
     <button id="clear" data-i18n="clearText" disabled>Clear text</button>
   </fieldset>
   <fieldset>
-    <legend data-i18n="other">Other</legend>
-    <button id="notify" data-i18n="sendNotification" disabled>Send sample notification</button>
-    <button id="time" data-i18n="syncTime" disabled>Sync time</button>
+    <legend data-i18n="gesture">Gesture</legend>
+    <output id="gesture" data-i18n="noGesture">None</output>
   </fieldset>
   <pre id="log" aria-live="polite"></pre>
-  <footer><a href="https://github.com/code4fukui/webglass-sdk" target="_blank" rel="noopener noreferrer">github.com/code4fukui/webglass-sdk</a></footer>
+  <footer>
+    <button id="language" type="button">日本語</button>
+    <a href="https://github.com/code4fukui/webglass-sdk" target="_blank" rel="noopener noreferrer">src on GitHub</a>
+  </footer>
   <script type="module" src="./app.js"></script>
 </body>
 </html>
