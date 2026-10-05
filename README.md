@@ -55,7 +55,17 @@ await sabera.disconnect();
 sabera.addEventListener('data', (event) => {
   console.log(event.detail); // DataView
 });
+
+// The callback receives tap, doubleTap, or longPress.
+const stopGestureEvents = sabera.onGesture(({ name, code }) => {
+  console.log(name, code);
+});
+
+// Stop receiving gesture callbacks when no longer needed.
+stopGestureEvents();
 ```
+
+`onGesture()`のコールバックで受け取れる`name`は`tap`、`doubleTap`、`longPress`のいずれかです。
 
 ## 実行条件
 

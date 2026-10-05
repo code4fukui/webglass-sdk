@@ -13,8 +13,32 @@ export const SABERA_UUIDS = Object.freeze({
   audioNotify: 'e49a3003-f69a-11e8-8eb2-f2801f1b9fd1',
 });
 
+export const SABERA_GESTURES = Object.freeze({
+  tap: 0x01,
+  doubleTap: 0x02,
+  longPress: 0x03,
+});
+
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
+
+function parseGesture(value) {
+  const bytes = toBytes(value);
+  if (bytes.length < 9 || bytes[1] !== 0x82) return null;
+  let offset = 5;
+  while (offset + 3 <= bytes.length) {
+    const type = bytes[offset];
+    const length = bytes[offset + 1] | (bytes[offset + 2] << 8);
+    if (offset + 3 + length > bytes.length) return null;
+    if (type === 0x01 && length >= 1) {
+      const code = bytes[offset + 3];
+      const name = Object.keys(SABERA_GESTURES).find((key) => SABERA_GESTURES[key] === code);
+      return name ? { name, code } : null;
+    }
+    offset += 3 + length;
+  }
+  return null;
+}
 
 const toBytes = (value) => {
   if (value instanceof Uint8Array) return value;
@@ -114,7 +138,12 @@ export class SaberaClient extends EventTarget {
     this.audioCharacteristic = null;
     this._queue = Promise.resolve();
     this._onDisconnect = () => this._handleDisconnect();
-    this._onNotification = (event) => this._emitData('data', event.target.value);
+    this._onNotification = (event) => {
+      const value = event.target.value;
+      this._emitData('data', value);
+      const gesture = parseGesture(value);
+      if (gesture) this._emitData('gesture', gesture);
+    };
   }
 
   get connected() { return Boolean(this.device?.gatt?.connected && this.writeCharacteristic); }
@@ -163,6 +192,14 @@ export class SaberaClient extends EventTarget {
 
   async sendCommands(commands) {
     for (const command of commands) await this.sendCommand(command);
+  }
+
+  /** Register a callback for tap, doubleTap, and longPress gestures. */
+  onGesture(callback) {
+    if (typeof callback !== 'function') throw new TypeError('Gesture callback must be a function');
+    const listener = (event) => callback(event.detail);
+    this.addEventListener('gesture', listener);
+    return () => this.removeEventListener('gesture', listener);
   }
 
   syncTime(date = new Date()) { return this.sendCommand(packet(0x01, { type: 0x01, value: dateBytes(date) })); }

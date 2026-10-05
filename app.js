@@ -3,7 +3,7 @@ import { SaberaClient, hex } from './sabera.js';
 const client = new SaberaClient();
 const $ = (id) => document.getElementById(id);
 let isJapanese = /^ja(?:-|$)/i.test(navigator.language);
-let lastGesture = 0;
+let lastGesture = null;
 const messages = {
   en: {
     title: 'SABERA Web Bluetooth', statusDisconnected: 'Disconnected', statusConnected: 'Connected: ',
@@ -46,33 +46,19 @@ const setConnected = (connected) => {
   for (const id of ['text-screen', 'send', 'home', 'clear']) $(id).disabled = !connected;
 };
 
-const gestureNames = { 0x01: 'tap', 0x02: 'doubleTap', 0x03: 'longPress' };
 const renderGesture = () => {
-  $('gesture').textContent = i18n[gestureNames[lastGesture] ?? 'noGesture'];
-};
-const readGesture = (value) => {
-  const bytes = new Uint8Array(value.buffer, value.byteOffset, value.byteLength);
-  if (bytes.length < 9 || bytes[1] !== 0x82) return;
-  let offset = 5;
-  while (offset + 3 <= bytes.length) {
-    const type = bytes[offset];
-    const length = bytes[offset + 1] | (bytes[offset + 2] << 8);
-    if (offset + 3 + length > bytes.length) return;
-    if (type === 0x01 && length >= 1) {
-      lastGesture = bytes[offset + 3];
-      renderGesture();
-      return;
-    }
-    offset += 3 + length;
-  }
+  $('gesture').textContent = i18n[lastGesture ?? 'noGesture'];
 };
 
 client.addEventListener('connected', ({ detail }) => { setConnected(true); log(`${i18n.connectedLog} (${detail.name ?? 'SABERA'})`); });
 client.addEventListener('disconnected', () => { setConnected(false); log(i18n.disconnectedLog); });
 client.addEventListener('warning', ({ detail }) => log(`${isJapanese ? '通知購読なし' : 'Notifications unavailable'}: ${detail.message}`));
 client.addEventListener('data', ({ detail }) => {
-  readGesture(detail);
   log(`${isJapanese ? '受信' : 'Received'}: ${hex(detail)}`);
+});
+client.onGesture(({ name }) => {
+  lastGesture = name;
+  renderGesture();
 });
 
 $('language').onclick = () => {
